@@ -17,8 +17,6 @@ let projectSchema = new Schema(
     },
     invitedMembers: {
         type:[String],
-        
-        
     },
     dueDate: {
       required: true,
