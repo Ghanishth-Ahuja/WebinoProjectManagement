@@ -1,7 +1,6 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-const { Schema, Model } = mongoose;
 let userSchema = new Schema({
   name: {
     type: String,
