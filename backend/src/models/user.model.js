@@ -27,7 +27,7 @@ let userSchema = new Schema({
   },
 });
 
-let User = Model("User", userSchema);
+let User = model("User", userSchema);
 
 User.pre("save", async function () {
   if (!this.isModified) this.password = await bcrypt.hash(password);
