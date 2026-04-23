@@ -22,7 +22,6 @@ COPY . .
 RUN DATABASE_URL="postgresql://dummy:dummy@dummy:5432/dummy" npx prisma generate
 # Build the application (for TypeScript)
 # IMPORTANT: If you are using plain JavaScript, delete or comment out the line below!
-RUN npm run build
 
 # Railway dynamically assigns a PORT environment variable. 
 # We set a default of 3000 just in case.
