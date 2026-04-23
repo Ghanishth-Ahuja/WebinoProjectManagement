@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '../../generated/prisma/client.js';
+import { PrismaClient } from '@prisma/client';
 
 // Grab the pooled port 6543 connection for your API traffic
 // Fallback to local DATABASE_URL for local development
