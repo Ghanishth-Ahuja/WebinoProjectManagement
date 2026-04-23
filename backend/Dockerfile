@@ -1,5 +1,5 @@
 # Use Node.js 20 Alpine for a lightweight image
-FROM node:20-alpine
+FROM node:22-alpine
 
 # Prisma requires OpenSSL to be installed on Alpine Linux
 RUN apk add --no-cache openssl
