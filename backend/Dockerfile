@@ -18,8 +18,8 @@ COPY prisma ./prisma/
 COPY . .
 
 # Generate the Prisma Client
-RUN npx prisma generate
-
+# Generate the Prisma Client with a dummy URL to bypass the build-time error
+RUN DATABASE_URL="postgresql://dummy:dummy@dummy:5432/dummy" npx prisma generate
 # Build the application (for TypeScript)
 # IMPORTANT: If you are using plain JavaScript, delete or comment out the line below!
 RUN npm run build
