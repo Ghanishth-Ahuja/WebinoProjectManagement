@@ -29,6 +29,5 @@ ENV PORT=3000
 EXPOSE ${PORT}
 
 # The Startup Command
-# 1. Runs your database migrations against Supabase (using DIRECT_URL)
 # 2. Starts your Node server
 CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
