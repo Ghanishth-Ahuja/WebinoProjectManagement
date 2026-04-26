@@ -20,7 +20,7 @@ userrouter.get("/me",isAuthenticated,me);
 userrouter.post("/register", validate(UserSchema), registerUser);
 userrouter.post("/logout", isAuthenticated, logoutUser);
 userrouter.post("/login"  ,validate(loginSchema), loginUser);
-userrouter.post("/resetpassword",isAuthenticated, resetPassword);
+userrouter.post("/resetpassword", resetPassword);
 userrouter.post("/changepassword",isAuthenticated,validate(resetPasswordSetNewSchema), changepassword);
 userrouter.post(
   "/sendresetpasswordmail",

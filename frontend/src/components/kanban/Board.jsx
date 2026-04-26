@@ -14,7 +14,7 @@ import { useState } from "react";
 import { List } from "./List";
 import { TaskCard } from "./TaskCard";
 
-export function Board({ lists, tasks, onDragEnd }) {
+export function Board({ lists, tasks, onDragEnd, onTaskClick, userRole, onDelete = () => {} }) {
   const [activeTask, setActiveTask] = useState(null);
 
   const sensors = useSensors(
@@ -74,11 +74,14 @@ export function Board({ lists, tasks, onDragEnd }) {
     >
       <Box p="md">
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
-          {lists.map((list) => (
+          {lists.sort((a, b) => a.position - b.position).map((list) => (
             <List
               key={list.id}
               list={list}
-              tasks={tasks.filter((t) => t.listId === list.id)}
+              tasks={tasks.filter((t) => t.listId === list.id).sort((a, b) => a.position - b.position)}
+              onTaskClick={onTaskClick}
+              userRole={userRole}
+              onDelete={onDelete}
             />
           ))}
         </SimpleGrid>
@@ -86,7 +89,7 @@ export function Board({ lists, tasks, onDragEnd }) {
 
       {/* Drag overlay - shows the task being dragged */}
       <DragOverlay>
-        {activeTask ? <TaskCard task={activeTask} /> : null}
+        {activeTask ? <TaskCard task={activeTask} userRole={userRole} onDelete={onDelete} /> : null}
       </DragOverlay>
     </DndContext>
   );

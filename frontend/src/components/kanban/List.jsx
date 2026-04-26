@@ -3,7 +3,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { TaskCard } from "./TaskCard";
 
-export function List({ list, tasks }) {
+export function List({ list, tasks, onTaskClick, userRole, onDelete }) {
   const { setNodeRef, isOver } = useDroppable({
     id: list.id,
     data: { list },
@@ -33,7 +33,7 @@ export function List({ list, tasks }) {
       >
         <Stack gap="sm">
           {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} />
+            <TaskCard key={task.id} task={task} onTaskClick={onTaskClick} userRole={userRole} onDelete={onDelete} />
           ))}
         </Stack>
       </SortableContext>

@@ -73,18 +73,22 @@ export default function ProjectDetail() {
 
   // Modal state
   const [opened, { open, close }] = useDisclosure(false);
-  console.log(project);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [taskModalOpened, { open: openTaskModal, close: closeTaskModal }] = useDisclosure(false);
   // Filter states
   const [filterAssignee, setFilterAssignee] = useState(null);
   const [filterPriority, setFilterPriority] = useState(null);
   const [filterDateFrom, setFilterDateFrom] = useState(null);
   const [filterDateTo, setFilterDateTo] = useState(null);
 
+  //project add load state
+  const [isAddingTask, setIsAddingTask] = useState(false);
+  
   // New task form state
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
-    priority: "MEDIUM",
+    priority: "medium",
     assignee: "",
     deadline: null,
   });
@@ -136,7 +140,6 @@ export default function ProjectDetail() {
     setIsLoading(true);
     try {
       const resp = await ApiService.GetData(`/project/getProjectByProjectId/${projectId}`);
-      console.log(resp);
 
       if (resp.success && resp.data) {
         // Use actual API response data
@@ -150,25 +153,65 @@ export default function ProjectDetail() {
           invitations: resp.data.invitations || [],
           status: "active", // Default status since not in response
         });
-
-        // For now, set empty tasks array - you might want to fetch tasks separately
-        setTasks([]);
       } else {
         console.error("Invalid response format:", resp);
         notifyError("Failed to load project data");
         setProject(null);
-        setTasks([]);
       }
     } catch (error) {
       console.error("Failed to fetch project:", error);
       setProject(null);
-      setTasks([]);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false);  
     }
   };
+  const onDelete = (taskId) => {
+    setTasks(tasks.filter((task) => task.id !== taskId));
+  };
+  // Fetch tasks for the project
+  const fetchTasks = async () => {
+    try {
+      const response = await ApiService.GetData(`/project/getAllTasksByProjectId/${projectId}`);
+      if (response.success) {
+        setTasks(response.data);
+      } else {
+        console.error("Invalid tasks response:", response);
+        setTasks([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch tasks:", error);
+      setTasks([]);
+    }
+  };
+  // Fetch lists for the project
+  const fetchLists = async () => {
+    try {
+      const response = await ApiService.GetData(`/project/getListsByProjectId/${projectId}`);
+      if (response.success && response.data.length > 0) {
+        setLists(response.data);
+      } else {
+        console.error("Invalid lists response or empty:", response);
+        setLists(initialLists);
+      }
+    } catch (error) {
+      console.error("Failed to fetch lists:", error);
+      setLists(initialLists);
+    }
+  };
+
+  const handleTaskDelete = (taskId) => {
+    setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+  };
+
   useEffect(() => {
-    fetchProject();
+    const loadData = async () => {
+      setIsLoading(true);
+      await fetchProject();
+      await fetchTasks();
+      await fetchLists();
+      setIsLoading(false);
+    };
+    loadData();
   }, [projectId]);
 
   // Get unique users for filters and dropdown (from project members)
@@ -194,16 +237,31 @@ export default function ProjectDetail() {
   });
 
   // Handle drag end - move task to new column
-  const handleDragEnd = (taskId, newListId) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === taskId ? { ...task, listId: newListId } : task
-      )
-    );
+  // In frontend/src/pages/ProjectDetail.jsx, around lines 283-304
+  const handleDragEnd = async (taskId, listId) => {
+    try {
+      // API call to update the task's listId in the database
+      const response = await ApiService.PutData(`/project/updateTask/${taskId}`, { listId });
+
+      if (response.success) {
+        // Update local state to reflect the change
+        setTasks(prevTasks =>
+          prevTasks.map(task =>
+            task.id === taskId ? { ...task, listId } : task
+          )
+        );
+        notifySuccess('Task moved successfully');
+      } else {
+        notifyError('Failed to move task');
+      }
+    } catch (error) {
+      notifyError('Failed to move task');
+    }
   };
 
   // Handle add new task
   const handleAddTask = async () => {
+    setIsAddingTask(true)
     if (!newTask.title) return;
 
     try {
@@ -226,12 +284,22 @@ export default function ProjectDetail() {
           deadline: null,
         });
         close();
+        await fetchTasks();
+        setIsAddingTask(false)
       } else {
         notifyError(response.message || "Failed to create task");
+        setIsAddingTask(false)
       }
     } catch (error) {
       notifyError(error.message || "Failed to create task");
+      setIsAddingTask(false)
     }
+  };
+
+  // Handle task click - open details modal
+  const handleTaskClick = (task) => {
+    setSelectedTask(task);
+    openTaskModal();
   };
 
   // Clear all filters
@@ -246,7 +314,6 @@ export default function ProjectDetail() {
       notifyError("Please enter an email address");
       return;
     }
-    console.log("Inviting email:", inviteEmail);
     setIsInviting(true);
     try {
       const response = await ApiService.PostData(
@@ -326,9 +393,6 @@ export default function ProjectDetail() {
           </Tabs.Tab>
           <Tabs.Tab value="members" leftSection={<IconUsers size={16} />}>
             Project Members
-          </Tabs.Tab>
-          <Tabs.Tab value="chat" leftSection={<IconMessage size={16} />}>
-            Chat Room
           </Tabs.Tab>
         </Tabs.List>
 
@@ -455,10 +519,10 @@ export default function ProjectDetail() {
               label="Priority"
               placeholder="All Priorities"
               data={[
-                { value: "URGENT", label: "Urgent" },
-                { value: "HIGH", label: "High" },
-                { value: "MEDIUM", label: "Medium" },
-                { value: "LOW", label: "Low" },
+                { value: "urgent", label: "Urgent" },
+                { value: "high", label: "High" },
+                { value: "medium", label: "Medium" },
+                { value: "low", label: "Low" },
               ]}
               value={filterPriority}
               onChange={setFilterPriority}
@@ -490,9 +554,8 @@ export default function ProjectDetail() {
           </Text>
         )}
       </Card>
-
           {/* Kanban Board */}
-          <Board lists={lists} tasks={filteredTasks} onDragEnd={handleDragEnd} />
+          <Board lists={lists} tasks={filteredTasks} onDragEnd={handleDragEnd} onTaskClick={handleTaskClick} userRole={isCurrentUserAdmin} onDelete={onDelete}/>
         </Tabs.Panel>
 
         {/* Project Members Tab */}
@@ -563,7 +626,6 @@ export default function ProjectDetail() {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {console.log(project)}
                 {project?.projectmembers
                   ?.filter(member => {
                     const matchesSearch = member.user?.name?.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
@@ -834,10 +896,10 @@ export default function ProjectDetail() {
               <Select
                 label="Priority"
                 data={[
-                  { value: "URGENT", label: "Urgent" },
-                  { value: "HIGH", label: "High" },
-                  { value: "MEDIUM", label: "Medium" },
-                  { value: "LOW", label: "Low" },
+                  { value: "urgent", label: "Urgent" },
+                  { value: "high", label: "High" },
+                  { value: "medium", label: "Medium" },
+                  { value: "low", label: "Low" },
                 ]}
                 value={newTask.priority}
                 onChange={(val) => setNewTask({ ...newTask, priority: val })}
@@ -865,17 +927,72 @@ export default function ProjectDetail() {
               setNewTask({ ...newTask, deadline: val })
             }}
             clearable
-          />{console.log(newTask.deadline)}
+          />
           <Group justify="flex-end" mt="md">
             <Button variant="light" onClick={close}>
               Cancel
             </Button>
-            <Button onClick={handleAddTask} disabled={!newTask.title}>
+            <Button onClick={handleAddTask} disabled={!newTask.title} loading={isAddingTask}>
               Create Task
             </Button>
           </Group>
         </Stack>
       </Modal>
+        {/* Task Details Modal */}
+      {console.log("Rendering modal, taskModalOpened:", taskModalOpened, "selectedTask:", selectedTask)}
+      <Modal opened={taskModalOpened} onClose={closeTaskModal} title="Task Details" size="lg">
+        {selectedTask && (
+            <Stack gap="md">
+              <Group justify="space-between">
+                <Title order={4}>{selectedTask.title}</Title>
+                <Badge color={
+                  selectedTask.priority === 'urgent' ? 'red' :
+                  selectedTask.priority === 'high' ? 'orange' :
+                  selectedTask.priority === 'medium' ? 'yellow' : 'green'
+                }>
+                  {selectedTask.priority}
+                </Badge>
+              </Group>
+
+              {selectedTask.description && (
+                <Text>{selectedTask.description}</Text>
+              )}
+
+              <Group gap="md">
+                {selectedTask.deadline && (
+                  <Text size="sm" c="dimmed">
+                    Due: {new Date(selectedTask.deadline).toLocaleDateString()}
+                  </Text>
+                )}
+                {selectedTask.assignee && (
+                  <Group gap="xs">
+                    <Avatar size="sm" radius="xl" src={selectedTask.assignee.avatar}>
+                      {selectedTask.assignee.name[0]}
+                    </Avatar>
+                    <Text size="sm">{selectedTask.assignee.name}</Text>
+                  </Group>
+                )}
+              </Group>
+
+              <Divider />
+
+              {/* Comments Section Placeholder */}
+              <Stack gap="sm">
+                <Title order={5}>Comments</Title>
+                <Text size="sm" c="dimmed">Comments functionality coming soon...</Text>
+              </Stack>
+
+              <Divider />
+
+              {/* Attachments Section Placeholder */}
+              <Stack gap="sm">
+                <Title order={5}>Attachments</Title>
+                <Text size="sm" c="dimmed">File attachments functionality coming soon...</Text>
+              </Stack>
+            </Stack>
+          )}
+        </Modal>
       </>
+
   );
 }

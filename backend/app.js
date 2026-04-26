@@ -3,12 +3,8 @@ import cors from "cors";
 import ApiError from "./src/utils/ApiError.js";
 import cookieParser from "cookie-parser";
 let app = express();
+app.use(cors({ origin: "http://localhost:5173",credentials:true }));
 app.use(express.json({ limit: "16kb" }));
-app.use(
-  cors({
-    origin: "*",
-  }),
-);
 app.use(express.urlencoded({ limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
@@ -16,6 +12,7 @@ app.use(cookieParser());
 import userrouter from "./src/routes/user.routes.js";
 import projectrouter from "./src/routes/project.routes.js";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
+import multer from "multer";
 app.use("/api/v1/user", userrouter);
 app.use("/api/v1/project", projectrouter);
 
@@ -30,6 +27,26 @@ app.use((err, req, res, next) => {
       errors: err.errors,
       data: null,
     });
+  }
+  if(err instanceof multer.MulterError)
+  {
+    switch(err.code) {
+      case "LIMIT_FILE_SIZE":
+        return res.status(400).json({
+          success: false,
+          message: "File size too large",
+        });
+      case "LIMIT_FILE_COUNT":
+        return res.status(400).json({
+          success: false,
+          message: "File count too large",
+        });
+      default:
+        return res.status(500).json({
+          success: false,
+          message: "Internal server error",
+        });
+    }
   }
   if (err instanceof PrismaClientKnownRequestError) {
     switch (err.code) {

@@ -6,4 +6,5 @@ import ResetPasswordAuth from "./ResetPasswordAuth";
 import ProjectMembers from "./ProjectMembers";
 import Settings from "./Settings";
 import ProjectDetail from "./ProjectDetail";
-export { Dashboard, Login, Signup, ResetPassword, ResetPasswordAuth, ProjectMembers, Settings, ProjectDetail };
+import TaskDetails  from "./TaskDetails";
+export { TaskDetails,Dashboard, Login, Signup, ResetPassword, ResetPasswordAuth, ProjectMembers, Settings, ProjectDetail };

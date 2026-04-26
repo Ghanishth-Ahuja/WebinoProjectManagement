@@ -6,6 +6,8 @@ import ApiResponse from "../utils/ApiResponse.js";
 import sendEmail from "../utils/sendEmail.js";
 import { HOST_NAME } from "../constants.js";
 import { invitationEmailHtml } from "../emailHtml/emailHtml.js";
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs"
 
 /**
  * @type {import("express").RequestHandler}
@@ -17,9 +19,13 @@ export const createProject = async (req, res) => {
   const existingUsers = await prisma.user.findMany({
     where: { email: { in: memberEmails } }
   });
+  console.log(existingUsers)
   //get existing emails
   const existingEmails = existingUsers.map(u => u.email);
   //get new emails
+  if(existingUsers.some(user=>user.id === req.user.id)){
+    throw new ApiError(400, "You will be automatially added to the project as ADMIN, remove your email from members list");
+  }
   const newEmails = memberEmails.filter(e => !existingEmails.includes(e));
   const project = await prisma.projects.create({
     data: {
@@ -31,9 +37,17 @@ export const createProject = async (req, res) => {
           userId: u.id,
           role: 'MEMBER'
         }))
+      }, lists: {
+        create: [
+          { title: 'To Do', position: 0, color: '#3b82f6' },
+          { title: 'In Progress', position: 1, color: '#f59e0b' },
+          { title: 'Review', position: 2, color: '#8b5cf6' },
+          { title: 'Done', position: 3, color: '#10b981' }
+        ]
       }
     }
   });
+  //create the admin user
   await prisma.projects.update({ where: { id: project.id }, data: { projectmembers: { create: { userId: req.user.id, role: "ADMIN" } } } });
   // Send invitations to non-registered
   for (const email of newEmails) {
@@ -208,21 +222,217 @@ export const getProjectMembersByProjectId = async (req, res) => {
   }
   return res.status(200).json(new ApiResponse(200, "Project members fetched successfully", projectMembers));
 }
-
+/**
+ * @type {import("express").RequestHandler}
+ */
+// POST /api/projects
 export const assignNewTaskToUser = async (req, res) => {
-  const { projectId, assignee, priority,title, description,deadline } = req.body;
+  const { projectId, userId, priority,title, description,deadline } = req.body;
+  console.log("assigneeId",userId)
+  const toDoList = await prisma.list.findFirst({
+    where: { projectId }
+  });
+  console.log(toDoList)
   const task = await prisma.tasks.create({
     data: {
-      projectId,
-      userId: req.user.id,
-      title,
-      description,
-      priority,
-      deadline
+      priority: priority,
+      title: title,
+      description: description,
+      deadline: deadline,
+      listId: toDoList.id,
+      projectId: projectId,
+      assigneeId: userId,
     }
   });
   if (!task) {
     throw new ApiError(404, "Task not created");
   }
   return res.status(200).json(new ApiResponse(200, "Task created successfully", task));
+}
+export const getAllTasksByProjectId = async (req, res) => {
+  const { projectId } = req.params;
+  if (!projectId) {
+    throw new ApiError(400, "Project ID is required");
+  }
+  const tasks = await prisma.tasks.findMany({
+    where: { projectId: projectId }
+  });
+  if (!tasks) {
+    throw new ApiError(404, "Tasks not found");
+  }
+  return res.status(200).json(new ApiResponse(200, "Tasks fetched successfully", tasks));
+}
+export const getListByprojectId = async (req, res) => {
+  const { projectId } = req.params;
+  if (!projectId) {
+    throw new ApiError(400, "Project ID is required");
+  }
+  const lists = await prisma.list.findMany({
+    where: { projectId: projectId }
+  });
+  if (!lists) {
+    throw new ApiError(404, "Lists not found");
+  }
+  return res.status(200).json(new ApiResponse(200, "Lists fetched successfully", lists));
+}
+export const getTaskByTaskId = async (req, res) => {
+  const { taskId } = req.params;
+  if (!taskId) {
+    throw new ApiError(400, "Task ID is required");
+  }
+  const task = await prisma.tasks.findUnique({
+    where: { id: taskId },
+    include:{assignee:{
+      select:{
+        name:true,
+        email:true
+      }
+    }}
+  });
+  if (!task) {
+    throw new ApiError(404, "Task not found");
+  }
+  return res.status(200).json(new ApiResponse(200, "Task fetched successfully", task));
+}
+export const createCommentOnTask = async (req, res) => {
+  const { taskId } = req.params;
+  if (!taskId) {
+    throw new ApiError(400, "Task ID is required");
+  }
+  const { content } = req.body;
+  if (!content) {
+    throw new ApiError(400, "Content is required");
+  }
+  const comment = await prisma.comment.create({
+    data: {
+      content: content,
+      taskId: taskId,
+      authorId: req.user.id
+    }
+  });
+  if (!comment) {
+    throw new ApiError(404, "Comment not created");
+  }
+  return res.status(200).json(new ApiResponse(200, "Comment created successfully", comment));
+}
+export const deleteCommentOnTaskByTaskId = async (req, res) => {
+  const { commentId } = req.params;
+  if (!commentId) {
+    throw new ApiError(400, "Comment ID is required");
+  }
+  const comment = await prisma.comment.delete({
+    where: { id: commentId }
+  });
+  if (!comment) {
+    throw new ApiError(404, "Comment not deleted");
+  }
+  return res.status(200).json(new ApiResponse(200, "Comment deleted successfully", comment));
+}
+export const getCommentsByTaskId = async (req, res) => {
+  const { taskId } = req.params;
+  if (!taskId) {
+    throw new ApiError(400, "Task ID is required");
+  }
+  const comments = await prisma.comment.findMany({
+    where: { taskId: taskId },
+    include:{author:true}
+  });
+  if (!comments) {
+    throw new ApiError(404, "Comments not found");
+  }
+  return res.status(200).json(new ApiResponse(200, "Comments fetched successfully", comments));
+}
+export const getAttachmentsByTaskId = async (req, res) => {
+  const { taskId } = req.params;
+  if (!taskId) {
+    throw new ApiError(400, "Task ID is required");
+  }
+  const attachments = await prisma.attachments.findMany({
+    where: { taskId: taskId }
+  });
+  if (!attachments) {
+    throw new ApiError(404, "Attachments not found");
+  }
+  return res.status(200).json(new ApiResponse(200, "Attachments fetched successfully", attachments));
+}
+export const addAttachmentsToTask = async (req, res) => {
+  const { taskId } = req.params;
+  if (!taskId) {
+    throw new ApiError(400, "Task ID is required");
+  }
+
+  if (!req.file) {
+    throw new ApiError(400, "No file uploaded");
+  }
+  const config = cloudinary.config({
+    cloud_name: "dexuggmw3",
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+  console.log(config);
+  const uniquePublicId = `product-${req.file.originalname.replace(/\s+/g, "_")}-${Date.now()}`;
+  // Upload an image
+  const uploadResult = await cloudinary.uploader
+    .upload(req?.file?.path, {
+      folder: "uploads",
+      public_id: uniquePublicId,
+      resource_type:"auto"
+    })
+    .catch((error) => {
+      console.log("idhr dekh be ",error);
+    });
+  let img_url = uploadResult?.secure_url;
+  const attachment = await prisma.attachments.create({
+    data: {
+      url: img_url,
+      taskId: taskId,
+      uploaderId: req.user.id
+    }
+  });
+
+  if (!attachment) {
+    throw new ApiError(500, "Attachment not created");
+  }
+  fs.unlinkSync(req.file.path);
+  return res.status(200).json(new ApiResponse(200, "Attachment uploaded successfully", attachment));
+}
+export const deleteAttachmentOnTaskByTaskId = async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    throw new ApiError(400, "Attachment ID is required");
+  }
+  const attachment = await prisma.attachments.delete({
+    where: { id: id }
+  });
+  if (!attachment) {
+    throw new ApiError(404, "Attachment not deleted");
+  }
+  return res.status(200).json(new ApiResponse(200, "Attachment deleted successfully", attachment));
+}
+export const deleteTaskByTaskId = async (req, res) => {
+  const { taskId } = req.params;
+  if (!taskId) {
+    throw new ApiError(400, "Task ID is required");
+  }
+  const task = await prisma.tasks.delete({
+    where: { id: taskId }
+  });
+  if (!task) {
+    throw new ApiError(404, "Task not deleted");
+  }
+  return res.status(200).json(new ApiResponse(200, "Task deleted successfully", task));
+}
+export const updateTaskByTaskId = async (req, res) => {
+  const { taskId } = req.params;
+  if (!taskId) {
+    throw new ApiError(400, "Task ID is required");
+  }
+  const task = await prisma.tasks.update({
+    where: { id: taskId },
+    data: req.body
+  });
+  if (!task) {
+    throw new ApiError(404, "Task not updated");
+  }
+  return res.status(200).json(new ApiResponse(200, "Task updated successfully", task));
 }

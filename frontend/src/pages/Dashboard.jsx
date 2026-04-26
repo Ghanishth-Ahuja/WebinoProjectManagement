@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ApiService from '../utils/ApiService';
+import { Loader } from "@mantine/core";
 import {
   Container,
   Title,
@@ -49,20 +51,66 @@ const recentProjects = [
   },
 ];
 
-const recentActivity = [
-  { user: "John Doe", action: "completed task", item: "Setup database", time: "2 hours ago" },
-  { user: "Jane Smith", action: "created task", item: "Design homepage", time: "4 hours ago" },
-  { user: "Mike Johnson", action: "moved task to", item: "In Progress", time: "5 hours ago" },
-];
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  // Sample stats
-  const totalProjects = 8;
-  const activeProjects = 5;
-  const completedProjects = 2;
-  const totalTasks = 24;
+  // State for dynamic data
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalProjects: 0,
+    activeProjects: 0,
+    completedProjects: 0,
+    totalTasks: 0,
+  });
+
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch projects
+        const projectsResponse = await ApiService.GetData('/project/getProjectsByUserId');
+        const projectsData = projectsResponse.data || [];
+        setProjects(projectsData.slice(0, 3)); // Show only recent 3 projects
+
+        // Calculate stats
+        const totalProjects = projectsData.length;
+        const activeProjects = projectsData.filter(p => p.status === 'active').length;
+        const completedProjects = projectsData.filter(p => p.status === 'completed').length;
+
+        // Fetch tasks for total count (you might need to create an endpoint for this)
+        // For now, we'll set a placeholder
+        const totalTasks = 0; // Placeholder
+
+        setStats({
+          totalProjects,
+          activeProjects,
+          completedProjects,
+          totalTasks,
+        });
+
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <Container size="xl" py="xl">
+        <Group justify="center">
+          <Loader size="lg" />
+        </Group>
+      </Container>
+    );
+  }
 
   return (
     <Container size="xl" py="xl">
@@ -100,7 +148,7 @@ export default function Dashboard() {
             />
           </Group>
           <Text size="xl" fw={700}>
-            {totalProjects}
+            {stats.totalProjects}
           </Text>
           <Badge color="blue" size="sm" mt="sm" variant="light">
             Active & Completed
@@ -120,7 +168,7 @@ export default function Dashboard() {
             />
           </Group>
           <Text size="xl" fw={700}>
-            {activeProjects}
+            {stats.activeProjects}
           </Text>
           <Badge color="yellow" size="sm" mt="sm" variant="light">
             In Progress
@@ -140,7 +188,7 @@ export default function Dashboard() {
             />
           </Group>
           <Text size="xl" fw={700}>
-            {completedProjects}
+            {stats.completedProjects}
           </Text>
           <Badge color="green" size="sm" mt="sm" variant="light">
             This Month
@@ -160,7 +208,7 @@ export default function Dashboard() {
             />
           </Group>
           <Text size="xl" fw={700}>
-            {totalTasks}
+            {stats.totalTasks}
           </Text>
           <Badge color="indigo" size="sm" mt="sm" variant="light">
             Across Projects
@@ -182,40 +230,46 @@ export default function Dashboard() {
         </Group>
 
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-          {recentProjects.map((project) => (
-            <Card
-              key={project.id}
-              withBorder
-              padding="md"
-              style={{ cursor: "pointer" }}
-              onClick={() => navigate(`/projects/${project.id}`)}
-            >
-              <Group justify="space-between" mb="xs">
-                <Text fw={600}>{project.name}</Text>
-                <Badge
-                  color={
-                    project.status === "completed"
-                      ? "green"
-                      : project.status === "active"
-                        ? "blue"
-                        : "gray"
-                  }
-                  size="sm"
-                  variant="light"
-                >
-                  {project.status}
-                </Badge>
-              </Group>
-              <Text size="sm" c="dimmed" mb="md">
-                {project.members} members • {project.progress}% complete
-              </Text>
+          {projects.length === 0 ? (
+            <Card withBorder padding="md">
+              <Text ta="center" c="dimmed">No projects found. Create your first project!</Text>
             </Card>
-          ))}
+          ) : (
+            projects.map((project) => (
+              <Card
+                key={project.id}
+                withBorder
+                padding="md"
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate(`/projects/${project.id}`)}
+              >
+                <Group justify="space-between" mb="xs">
+                  <Text fw={600}>{project.title}</Text>
+                  <Badge
+                    color={
+                      project.status === "completed"
+                        ? "green"
+                        : project.status === "active"
+                          ? "blue"
+                          : "gray"
+                    }
+                    size="sm"
+                    variant="light"
+                  >
+                    {project.status}
+                  </Badge>
+                </Group>
+                <Text size="sm" c="dimmed" mb="md">
+                  {project.projectmembers?.length || 0} members • Created {new Date(project.createdAt).toLocaleDateString()}
+                </Text>
+              </Card>
+            ))
+          )}
         </SimpleGrid>
       </Stack>
 
       {/* Recent Activity Section */}
-      <Stack gap="md">
+      {/* <Stack gap="md">
         <Title order={3}>Recent Activity</Title>
         <Card withBorder>
           <Stack gap="sm">
@@ -240,7 +294,7 @@ export default function Dashboard() {
             ))}
           </Stack>
         </Card>
-      </Stack>
+      </Stack> */}
     </Container>
   );
 }

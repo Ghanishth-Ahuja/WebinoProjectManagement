@@ -135,6 +135,7 @@ export default function Projects() {
 
   // Check if user is ADMIN for a specific project
   const isProjectAdmin = (project) => {
+    console.log(project)
     return project.projectmembers?.some(
       (member) => member.userId === currentUserId && member.role === "ADMIN"
     );
@@ -148,8 +149,6 @@ export default function Projects() {
     return matchesSearch;
   });
 
-  // Check if user can create projects (is ADMIN in at least one project)
-  const canCreateProject = projects.some((project) => isProjectAdmin(project));
 
   return (<>
     <Container size="xl" py="xl">
@@ -161,15 +160,13 @@ export default function Projects() {
             Manage and track your project progress
           </Text>
         </div>
-        {canCreateProject && (
-          <Button
-            variant="outline"
-            justify="flex-start"
-            leftSection={<IconFolderPlus />}
-            onClick={handleOpenCreate}>
-            Add New Project
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          justify="flex-start"
+          leftSection={<IconFolderPlus />}
+          onClick={handleOpenCreate}>
+          Add New Project
+        </Button>
       </Group>
 
       {/* Filters Section */}

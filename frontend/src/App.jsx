@@ -11,6 +11,7 @@ import {
   ProjectMembers,
   Settings,
   ProjectDetail,
+  TaskDetails,
 } from "./pages/index.js";
 import Projects from "./pages/Projects.jsx";
 
@@ -38,7 +39,8 @@ function App() {
           <Route path="/projects/:projectId" element={<ProjectDetail />} />
           <Route path="/members" element={<ProjectMembers />} />
           <Route path="/settings" element={<Settings />} />
-        </Route>
+          <Route path="/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
+        </Route>  
       </Route>
 
       {/* Catch all - redirect to login */}

@@ -1,7 +1,7 @@
 // src/layouts/components/Header.js
 import { Group, Text, ActionIcon, Burger, Box } from "@mantine/core";
 import { useMantineColorScheme } from "@mantine/core";
-import { IconMoon, IconSun } from "@tabler/icons-react";
+import { IconMoon, IconSun,IconBell } from "@tabler/icons-react";
 import { UserMenu } from "./UserMenu";
 
 export default function Header({ mobileOpened, toggleMobile }) {
@@ -23,6 +23,12 @@ export default function Header({ mobileOpened, toggleMobile }) {
 
       {/* Right */}
       <Box style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <ActionIcon
+        variant="default"
+        size={"lg"}
+        >
+          <IconBell size={20}/>
+        </ActionIcon>
         <ActionIcon
           onClick={toggleColorScheme}
           variant="default"

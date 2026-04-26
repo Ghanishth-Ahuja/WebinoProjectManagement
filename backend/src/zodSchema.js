@@ -27,4 +27,5 @@ export const taskSchema = z.object({
   title: z.string(),
   description: z.string(),
   deadline: z.string(),
+  userId:z.string()
 });
