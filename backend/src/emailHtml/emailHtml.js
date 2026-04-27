@@ -83,7 +83,7 @@ export const resetPasswordHtml = ({ buttonUrl, content }) => `
   </head>
   <body>
     <div class="container text-center p-4">
-      <img src="https://d1oco4z2z1fhwp.cloudfront.net/templates/default/3986/header3.png" alt="Main Image" class="img-fluid mb-3" style="max-width: 232px" />
+      <img src="https://res.cloudinary.com/dys7w7cul/image/upload/q_auto/f_auto/v1777229618/icon_rg45al.png" alt="Main Image" class="img-fluid mb-3" style="max-width: 232px" />
       <h1 class="h4">Reset Your Password</h1>
       <p>${content}</p>
       <a href="${buttonUrl}" class="btn-reset mt-3">RESET MY PASSWORD</a>
