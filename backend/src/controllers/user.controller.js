@@ -116,7 +116,13 @@ export const loginUser = async (req, res) => {
  * @type {import("express").RequestHandler}
  */
 export const logoutUser = async (req, res) => {
-  res.clearCookie("token");
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 0,
+    expires: new Date(0),
+  });
   return res.status(200).json(new ApiResponse(200, "Logged out successfully"));
 };
 /**
