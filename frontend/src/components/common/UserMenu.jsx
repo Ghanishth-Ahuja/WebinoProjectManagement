@@ -22,6 +22,7 @@ export function UserMenu() {
   const handleLogout = async () => {
     try {
       await ApiService.PostData("/user/logout", {});
+      localStorage.clear(); // Clear all localStorage to reset authentication state
       setUser([]);
       setIsAuthenticated(false);
       notifySuccess("Logged out successfully");
