@@ -21,7 +21,6 @@ app.use((err, req, res, next) => {
   console.error(err);
   if (err instanceof ApiError) {
     console.error(`23 Error occured ${err}`);
-    // console.log(import.meta.filename);
     return res.status(err.statuscode).json({
       success: false,
       message: err.message || "Server Error",

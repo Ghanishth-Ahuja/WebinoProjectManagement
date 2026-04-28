@@ -40,16 +40,13 @@ export function TaskCard({ task, userRole, onDelete }) {
   const { projectId } = useParams();
 
   const handleCardClick = (e) => {
-    console.log("TaskCard clicked:", task.title);
     // Prevent navigation if clicking on drag handle
     if (e.target.closest('[data-drag-handle]')) return;
-    console.log("Navigating to task details:", task.title);
     navigate(`/projects/${projectId}/tasks/${task.id}`);
   };
 
   const handleDelete = async (e) => {
     e.stopPropagation(); // Prevent card click
-    console.log("Deleting task:", task.title);
     try {
       await ApiService.DeleteData(`/project/deleteTaskByTaskId/${task.id}`);
       notifySuccess('Task deleted successfully');

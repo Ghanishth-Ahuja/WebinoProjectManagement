@@ -31,9 +31,7 @@ export default function Login() {
     try {
       e.preventDefault();
       setLoading(true);
-      console.log(formdata);
       const response = await ApiService.PostData("/user/login", formdata);
-      console.log("login response",response);
       if (response.success) {
         notifySuccess("Login Successful");
         navigate("/dashboard");

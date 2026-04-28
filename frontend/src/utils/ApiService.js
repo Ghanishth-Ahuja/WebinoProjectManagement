@@ -65,7 +65,6 @@ export default ApiServices = {
         },
       );
       const jsonresponse = await response.json();
-      console.log(jsonresponse);
       if (!response.ok) {
         
         throw {

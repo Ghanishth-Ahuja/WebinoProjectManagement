@@ -50,7 +50,6 @@ export default function Signup() {
   const validateInvitationToken = async (token) => {
     try {
       const response = await ApiService.GetData(`/project/validateInvitationToken/${token}`);
-      console.log(response);
       if (response.success) {
         setInvitationData(response.data);
         // Pre-fill email from invitation
@@ -72,25 +71,19 @@ export default function Signup() {
       setLoading(true);
       if(invitationToken)
       {
-        console.log("jab tu hai")
         const response = await ApiService.PostData("/user/registerUserUsingInvitation", {...formdata,invitationToken});
         if (response.success) navigate("/dashboard");
-        console.log(response);
       }
-      console.log(formdata);
       const response = await ApiService.PostData("/user/register", formdata);
       if (response.success) navigate("/login");
-      console.log(response);
     } catch (error) {
       setError({ error: true, message: error?.message });
       setLoading(false);
     }
   };
   const setData = (e) => {
-    console.log(e);
     setFormData({ ...formdata, [e.target.name]: e.target.value });
   };
-  console.log(formdata);
   return (
     <Container size="sm" py="xl" px="md">
       <Center h="100vh" style={{ minHeight: "100vh" }}>

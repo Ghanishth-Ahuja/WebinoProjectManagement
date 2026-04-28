@@ -63,7 +63,6 @@ function SectionCard({ title, description, children, icon: Icon }) {
 function ProfileTab() {
   const { user, setUser } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
-  console.log(user)
   const form = useForm({
     initialValues: {
       name: user?.name || "",
@@ -81,7 +80,6 @@ function ProfileTab() {
     setIsLoading(true);
     try {
       const response = await ApiService.PostData(`/user/updateUserName/${user?.id}`, {userName});
-      console.log("here==",response)
       if (response.success) {
         setUser({ ...user, name: userName });
         notifySuccess(
@@ -89,7 +87,6 @@ function ProfileTab() {
         );
       }
     } catch (error) {
-      console.log("here====>",error)
       notifyError("Failed to update profile",
       );
     } finally {
@@ -128,7 +125,7 @@ function ProfileTab() {
               placeholder="Your name"
               value={userName}
               onChange={(e)=>setUserName(e.target.value)}
-            />{console.log(userName)}
+            />
 
             <TextInput
               label="Email Address"

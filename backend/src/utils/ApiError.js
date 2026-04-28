@@ -19,11 +19,4 @@ class ApiError extends Error {
   }
 }
 
-// let result = sendErrorResponse(500, "something  went wrong");
-// console.log(result);
-// console.log(typeof result);
-// for (const key of Object.entries(result)) {
-//   console.log(key);
-// }
-
 export default ApiError;

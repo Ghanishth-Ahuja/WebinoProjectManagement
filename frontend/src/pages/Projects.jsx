@@ -135,7 +135,6 @@ export default function Projects() {
 
   // Check if user is ADMIN for a specific project
   const isProjectAdmin = (project) => {
-    console.log(project)
     return project.projectmembers?.some(
       (member) => member.userId === currentUserId && member.role === "ADMIN"
     );

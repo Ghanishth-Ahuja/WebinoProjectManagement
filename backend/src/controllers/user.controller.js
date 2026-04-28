@@ -116,14 +116,13 @@ export const loginUser = async (req, res) => {
  * @type {import("express").RequestHandler}
  */
 export const logoutUser = async (req, res) => {
-  res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "none", path:"/" });
+  res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "none", path:"/" });//path is important for logging out because by default cookies is set for path /
   return res.status(200).json(new ApiResponse(200, "Logged out successfully"));
 };
 /**
  * @type {import("express").RequestHandler}
  */
 export const me = async (req, res) => {
-  console.log("inside me controller user", req.user );
   const token = req?.cookies?.token;
   if (!token) {
     throw new ApiError(401, "No JWT Token");
@@ -141,7 +140,6 @@ export const me = async (req, res) => {
  */
 export const sendResetPasswordMail = async (req, res) => {
   const { email } = req?.body;
-  console.log(email);
   const user = await prisma.user.findUnique({
     where: {
       email: email,
@@ -161,11 +159,8 @@ export const sendResetPasswordMail = async (req, res) => {
         ),
       );
   }
-  console.log("user", user);
   const resetToken = crypto.randomBytes(32).toString("hex");
   const expires = new Date(Date.now() + 15 * 60 * 1000);
-  console.log(expires);
-  console.log(typeof expires);
   const setResetToken = await prisma.passwordResetToken.create({
     data: {
       email: user?.email,
@@ -173,9 +168,6 @@ export const sendResetPasswordMail = async (req, res) => {
       token: resetToken,
     },
   });
-  console.log(setResetToken);
-  console.log(`reset token is: ${resetToken}`);
-  console.log(`${HOST_NAME}/resetpassword/${resetToken}`);
   const response = await sendEmail({
     subject: "Password Reset Email",
     receicerEmail: user?.email,
@@ -185,7 +177,6 @@ export const sendResetPasswordMail = async (req, res) => {
       content: "Reset your email password",
     }),
   });
-  console.log("email response", response);
   return res
     .status(200)
     .json(

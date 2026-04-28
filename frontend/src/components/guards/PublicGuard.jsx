@@ -6,7 +6,6 @@ import ApiService from "../../utils/ApiService.js";
 
 export function PublicGuard() {
   const { isAuthenticated, setIsAuthenticated } = useContext(UserContext);
-  console.log("isAuthenticated", isAuthenticated);
   useEffect(() => {
     ApiService.GetData("/user/me").then((response) => {
       if(response.success){

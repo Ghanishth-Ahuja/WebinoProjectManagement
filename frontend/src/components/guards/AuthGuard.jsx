@@ -20,7 +20,6 @@ export function AuthGuard() {
         }
       })
       .catch((error) => {
-        console.log(error);
         setIsAuthenticated(false);
         // Show notification only once
         if (!hasNotified.current) {
@@ -40,7 +39,6 @@ export function AuthGuard() {
         setIsAuthenticated(true);
       }
     }).catch((error) => {
-      console.log(error);
       setUser([]);
     });
   }, []);

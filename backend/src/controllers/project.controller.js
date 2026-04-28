@@ -19,7 +19,6 @@ export const createProject = async (req, res) => {
   const existingUsers = await prisma.user.findMany({
     where: { email: { in: memberEmails } }
   });
-  console.log(existingUsers)
   //get existing emails
   const existingEmails = existingUsers.map(u => u.email);
   //get new emails
@@ -140,12 +139,10 @@ export const addProjectMember = async (req, res) => {
 
 }
 export const getProjectsByUserId = async (req, res) => {
-  console.log(req.user);
   const projects = await prisma.projects.findMany({
     where: { projectmembers: { some: { userId: req.user.id } } },
     include: { projectmembers: true }
   });
-  console.log(projects);
   return res.status(200).json(new ApiResponse(200, "Projects fetched successfully", projects));
 }
 
@@ -228,11 +225,9 @@ export const getProjectMembersByProjectId = async (req, res) => {
 // POST /api/projects
 export const assignNewTaskToUser = async (req, res) => {
   const { projectId, userId, priority,title, description,deadline } = req.body;
-  console.log("assigneeId",userId)
   const toDoList = await prisma.list.findFirst({
     where: { projectId }
   });
-  console.log(toDoList)
   const task = await prisma.tasks.create({
     data: {
       priority: priority,
@@ -369,7 +364,6 @@ export const addAttachmentsToTask = async (req, res) => {
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
   });
-  console.log(config);
   const uniquePublicId = `product-${req.file.originalname.replace(/\s+/g, "_")}-${Date.now()}`;
   // Upload an image
   const uploadResult = await cloudinary.uploader
@@ -379,7 +373,6 @@ export const addAttachmentsToTask = async (req, res) => {
       resource_type:"auto"
     })
     .catch((error) => {
-      console.log("idhr dekh be ",error);
     });
   let img_url = uploadResult?.secure_url;
   const attachment = await prisma.attachments.create({

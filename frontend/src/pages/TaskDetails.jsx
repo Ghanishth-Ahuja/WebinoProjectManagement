@@ -90,7 +90,6 @@ export default function TaskDetails() {
 
     const formData = new FormData();
     formData.append('file', selectedFile);
-    console.log("file",selectedFile)
     if(selectedFile.size > 1024 * 1024 * 10) {
       notifyError('File larger than 10 MB');
       return;

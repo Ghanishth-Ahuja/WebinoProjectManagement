@@ -939,7 +939,6 @@ export default function ProjectDetail() {
         </Stack>
       </Modal>
         {/* Task Details Modal */}
-      {console.log("Rendering modal, taskModalOpened:", taskModalOpened, "selectedTask:", selectedTask)}
       <Modal opened={taskModalOpened} onClose={closeTaskModal} title="Task Details" size="lg">
         {selectedTask && (
             <Stack gap="md">

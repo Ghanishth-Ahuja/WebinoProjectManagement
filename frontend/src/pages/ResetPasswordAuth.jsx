@@ -60,12 +60,10 @@ export default function ResetPasswordAuth() {
     try {
       e.preventDefault();
       setLoading(true);
-      console.log(formdata);
       const response = await ApiService.PostData(
         "/user/resetpassword",
         formdata,
       );
-      console.log(response);
       setMessage({
         shouldShow: true,
         error: false,
@@ -85,10 +83,8 @@ export default function ResetPasswordAuth() {
     }
   };
   const setData = (e) => {
-    console.log(e);
     setFormData({ ...formdata, [e.target.name]: e.target.value });
   };
-  console.log(formdata);
   return (
     <Container size="sm" py="xl" px="md">
       <Center h="100vh" style={{ minHeight: "100vh" }}>
