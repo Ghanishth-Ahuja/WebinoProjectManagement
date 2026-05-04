@@ -2,20 +2,13 @@ import { useState } from "react";
 import {
   Container,
   Card,
-  Title,
-  Text,
   TextInput,
-  PasswordInput,
   Button,
-  Anchor,
   Group,
-  Divider,
-  Box,
   Stack,
   Center,
   Alert,
   Image,
-  NavLink,
 } from "@mantine/core";
 import {
   IconAlertCircle,
@@ -49,7 +42,6 @@ export default function ResetPassword() {
         message: [response?.message],
       });
       setLoading(false);
-      // if (response.success) navigate("/dashboard");
     } catch (error) {
       setMessage({ shouldShow: true, error: true, message: error?.message });
       setLoading(false);
@@ -78,10 +70,6 @@ export default function ResetPassword() {
             </Button>
           </Group>
           <Stack gap="lg" align="center">
-            {/* <Title order={2} ta="center" fw={700}>
-              Reset Password
-            </Title> */}
-
             <Image src="/Reset_password.svg" />
             <form onSubmit={handleSubmit} style={{ width: "100%" }}>
               <Stack gap="md">
@@ -94,7 +82,6 @@ export default function ResetPassword() {
                   value={formdata.email}
                   onChange={(e) => setData(e)}
                 />
-
                 {message.shouldShow && (
                   <Alert
                     title={message?.error ? "Error" : "Success"}
@@ -118,19 +105,6 @@ export default function ResetPassword() {
                 </Button>
               </Stack>
             </form>
-            {/* <Divider label="OR" labelPosition="center" w="100%" /> */}
-            {/* <Group gap="xs" justify="center">
-              <Text size="sm" c="dimmed">
-                Don't have an account?
-              </Text>
-              <Anchor
-                component="button"
-                type="button"
-                size="sm"
-                onClick={() => navigate("/signup")}>
-                signup
-              </Anchor>
-            </Group> */}
           </Stack>
         </Card>
       </Center>

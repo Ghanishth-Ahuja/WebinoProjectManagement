@@ -9,7 +9,7 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import UserContext from "../../context/UserContext.js";
 import ApiService from "../../utils/ApiService.js";
-import { notifyError, notifySuccess } from "../../utils/Notification.jsx";
+import { notifySuccess } from "../../utils/Notification.jsx";
 
 /**
  * Reusable UserMenu component

@@ -19,7 +19,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     {/* MantineProvider wraps everything - applies your theme */}
     <MantineProvider theme={theme}  defaultColorScheme="auto">
       {/* Notifications for success/error messages */}
-      <Notifications position="top-right" />
+      <Notifications position="bottom-right" />
 
       {/* Your app */}
       <UserContextProvider>

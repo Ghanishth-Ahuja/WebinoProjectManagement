@@ -7,7 +7,7 @@ import {
   resetPasswordValidateToken,
   me,
   logoutUser,
-  updateUserNameById,
+  updateUserProfileById,
   registerUserUsingInvitation,
   changepassword
 } from "../controllers/user.controller.js";
@@ -15,6 +15,7 @@ let userrouter = express.Router();
 import { UserSchema, loginSchema, resetPasswordSchema,resetPasswordSetNewSchema } from "../zodSchema.js";
 import validate from "../middlewares/validate.js";
 import isAuthenticated from "../middlewares/isAuthenticated.js";
+import { uploadSingle } from "../middlewares/multer.js";
 
 userrouter.get("/me",isAuthenticated,me);
 userrouter.post("/register", validate(UserSchema), registerUser);
@@ -29,6 +30,6 @@ userrouter.post(
 );
 userrouter.post("/resetpasswordvalidate", resetPasswordValidateToken);
 userrouter.post("/registerUserUsingInvitation", registerUserUsingInvitation);
-userrouter.post("/updateUserName/:userId", isAuthenticated, updateUserNameById);
+userrouter.post("/updateUserProfileById/:userId", isAuthenticated,uploadSingle("avatar"), updateUserProfileById);
 
 export default userrouter;

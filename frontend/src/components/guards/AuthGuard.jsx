@@ -35,7 +35,7 @@ export function AuthGuard() {
   useEffect(()=>{
     ApiService.GetData("/user/me").then((response) => {
       if(response.success){
-        setUser({name:response.data?.name,email:response.data?.email,id:response.data?.id});
+        setUser({name:response.data?.name,email:response.data?.email,id:response.data?.id,avatar:response.data?.avatar});
         setIsAuthenticated(true);
       }
     }).catch((error) => {

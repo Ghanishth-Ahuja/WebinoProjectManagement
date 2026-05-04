@@ -71,7 +71,6 @@ export default function ResetPasswordAuth() {
       });
       setLoading(false);
       navigate("/login")
-      // if (response.success) navigate("/dashboard");
     } catch (error) {
       setMessage({
         shouldShow: true,

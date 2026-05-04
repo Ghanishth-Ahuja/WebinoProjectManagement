@@ -8,7 +8,7 @@ import { IconFolder, IconEdit, IconTrash } from "@tabler/icons-react";
  */
 export function ProjectCard({ project, onEdit, onDelete, canModify = false }) {
   const navigate = useNavigate();
-  const { id, title, color = "indigo" } = project;
+  const { id, title, color = "indigo",createdBy } = project;
 
   const handleClick = () => {
     navigate(`/projects/${id}`);
@@ -23,7 +23,7 @@ export function ProjectCard({ project, onEdit, onDelete, canModify = false }) {
     e.stopPropagation();
     onDelete?.(project);
   };
-
+  console.log(project)
   return (
     <Card
       withBorder
@@ -91,6 +91,12 @@ export function ProjectCard({ project, onEdit, onDelete, canModify = false }) {
         <Text fw={600} size="md" ta="center" lineClamp={2}>
           {title}
         </Text>
+        {/* <Text c="dimmed">
+          Admin Name: {createdBy.name}
+        </Text>
+        <Text c="dimmed">
+          Admin Email: {createdBy.email}
+        </Text> */}
       </Stack>
     </Card>
   );

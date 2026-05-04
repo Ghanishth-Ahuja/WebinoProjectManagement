@@ -3,7 +3,6 @@ import { IconCalendar, IconGripVertical, IconTrash } from '@tabler/icons-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useNavigate, useParams } from 'react-router-dom';
-import { notifications } from '@mantine/notifications';
 import ApiService from '../../utils/ApiService.js';
 import { notifyError, notifySuccess } from '../../utils/Notification.jsx';
 
@@ -117,7 +116,7 @@ export function TaskCard({ task, userRole, onDelete }) {
           <Group gap={4}>
             <IconCalendar size={14} stroke={1.5} />
             <Text size="xs" c="dimmed">
-              {new Date(task.deadline).toLocaleDateString()}
+              {new Date(task.deadline).toLocaleDateString("en-GB")}
             </Text>
           </Group>
         )}

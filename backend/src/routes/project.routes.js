@@ -1,5 +1,5 @@
 import express from "express";
-import { createProject, addProjectMember, deleteProjectMember, validateInvitationToken, getProjectsByUserId, getProjectByProjectId, getProjectMembersByProjectId, deleteProjectById, assignNewTaskToUser, getAllTasksByProjectId,getListByprojectId, createCommentOnTask, getCommentsByTaskId, deleteCommentOnTaskByTaskId, getAttachmentsByTaskId, addAttachmentsToTask, deleteAttachmentOnTaskByTaskId, getTaskByTaskId, deleteTaskByTaskId, updateTaskByTaskId     } from "../controllers/project.controller.js";
+import { createProject, addProjectMember, deleteProjectMember, validateInvitationToken, getProjectsByUserId, getProjectByProjectId, getProjectMembersByProjectId, deleteProjectById, assignNewTaskToUser, getAllTasksByProjectId,getListByprojectId, createCommentOnTask, getCommentsByTaskId, deleteCommentOnTaskByTaskId, getAttachmentsByTaskId, addAttachmentsToTask, deleteAttachmentOnTaskByTaskId, getTaskByTaskId, deleteTaskByTaskId, updateTaskByTaskId, getAllNotificationsByUserId     } from "../controllers/project.controller.js";
 import isAuthenticated from "../middlewares/isAuthenticated.js";
 import { uploadSingle } from "../middlewares/multer.js";
 import validate from "../middlewares/validate.js";
@@ -27,5 +27,6 @@ projectRouter.delete("/deleteAttachmentOnTaskByTaskId/:id", isAuthenticated, del
 projectRouter.get("/getTaskByTaskId/:taskId", isAuthenticated, getTaskByTaskId);
 projectRouter.delete("/deleteTaskByTaskId/:taskId", isAuthenticated, deleteTaskByTaskId);
 projectRouter.put("/updateTask/:taskId", isAuthenticated, updateTaskByTaskId);
+projectRouter.get("/getAllNotificationsByUserId/:userId", isAuthenticated, getAllNotificationsByUserId);
 export default projectRouter;
 

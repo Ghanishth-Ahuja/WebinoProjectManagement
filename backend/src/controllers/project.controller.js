@@ -58,9 +58,10 @@ export const createProject = async (req, res) => {
         projectId: project.id,
         token,
         expiresAt: new Date(Date.now() + (7 * 24 * 60 * 60 * 1000))
-      }
+      },
     })
     const emaildone = await sendEmail({
+      senderName:req.user.name,
       receicerEmail: email,
       name: "User",
       subject: "Project Invitation",
@@ -91,7 +92,11 @@ export const validateInvitationToken = async (req, res) => {
 }
 export const addProjectMember = async (req, res) => {
   const { projectId } = req.params;
-  const { email } = req.body;
+  const { email,isCurrentUserAdmin } = req.body;
+  if(!isCurrentUserAdmin)
+  {
+    throw new ApiError(403,"Only admins can add project members");
+  }
   if (!projectId || !email) {
     throw new ApiError(400, "Project ID and Email are required");
   }
@@ -141,7 +146,24 @@ export const addProjectMember = async (req, res) => {
 export const getProjectsByUserId = async (req, res) => {
   const projects = await prisma.projects.findMany({
     where: { projectmembers: { some: { userId: req.user.id } } },
-    include: { projectmembers: true }
+    include: { projectmembers: {
+      include:{
+        user:{
+          select:{
+            id:true,
+            name:true,
+            email:true,
+            role:true
+          }
+        }
+      }
+    },createdBy:{
+      select:{
+        id:true,
+        name:true,
+        email:true
+      }
+    } }
   });
   return res.status(200).json(new ApiResponse(200, "Projects fetched successfully", projects));
 }
@@ -250,7 +272,8 @@ export const getAllTasksByProjectId = async (req, res) => {
     throw new ApiError(400, "Project ID is required");
   }
   const tasks = await prisma.tasks.findMany({
-    where: { projectId: projectId }
+    where: { projectId: projectId },
+    include:{list:true}
   });
   if (!tasks) {
     throw new ApiError(404, "Tasks not found");
@@ -428,4 +451,17 @@ export const updateTaskByTaskId = async (req, res) => {
     throw new ApiError(404, "Task not updated");
   }
   return res.status(200).json(new ApiResponse(200, "Task updated successfully", task));
+}
+export const getAllNotificationsByUserId=async(req,res)=>{
+  const { userId } = req.params;
+  if (!userId) {
+    throw new ApiError(400, "User ID is required");
+  }
+  const notifications = await prisma.notification.findMany({
+    where: { receiverId: userId }
+  });
+  if (!notifications) {
+    throw new ApiError(404, "Notifications not found");
+  }
+  return res.status(200).json(new ApiResponse(200, "Notifications fetched successfully", notifications));
 }

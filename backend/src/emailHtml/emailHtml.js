@@ -90,6 +90,9 @@ export const resetPasswordHtml = ({ buttonUrl, content }) => `
       <p class="mt-2">
         If you're having trouble with the button above, copy and paste the URL below into your web browser.
       </p>
+      <p class="mt-2">
+        ${buttonUrl}
+      </p>
       <hr class="border-light-blue my-4" />
       <p><strong>Didn't request a password reset?</strong></p>
       <p>You can safely ignore this message.</p>
@@ -188,6 +191,9 @@ export const invitationEmailHtml = (buttonUrl, projectName) => `
       <a href="${buttonUrl}" class="btn-accept mt-3">ACCEPT INVITATION</a>
       <p class="mt-2">
         If you're having trouble with the button above, copy and paste the URL below into your web browser.
+      </p>
+      <p class="mt-2">
+        ${buttonUrl}
       </p>
       <hr class="border-light-blue my-4" />
       <p><strong>Didn't request this invitation?</strong></p>

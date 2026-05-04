@@ -35,7 +35,7 @@ export default function Login() {
       if (response.success) {
         notifySuccess("Login Successful");
         navigate("/dashboard");
-        setUser({name:response.data?.name,email:response.data?.email,id:response.data?.id});
+        setUser({name:response.data?.name,email:response.data?.email,id:response.data?.id,avatar:response.data?.avatar});
         setIsAuthenticated(true);
       }
     } catch (error) {
@@ -49,16 +49,6 @@ export default function Login() {
   };
   return (
     <Container size="sm" py="xl" px="md">
-      {/* <Group justify="flex-start">
-        <IconArrowLeft />
-        <Anchor
-          component="button"
-          size="sm"
-          type="button"
-          onClick={() => navigate("/forgotpassword")}>
-          Home
-        </Anchor>
-      </Group>{" "} */}
       <Center h="100vh" style={{ minHeight: "100vh" }}>
         <Card
           shadow="sm"
@@ -110,9 +100,6 @@ export default function Login() {
                     Forgot password?
                   </Anchor>
                 </Group>
-                {/* {error.error && (
-                  <ErrorNotification message={`Login failed ${error?.message}`}/>
-                )} */}
                 <Button
                   type="submit"
                   fullWidth
@@ -132,9 +119,7 @@ export default function Login() {
                 </Button>
               </Stack>
             </form>
-
             <Divider label="OR" labelPosition="center" w="100%" />
-
             <Group gap="xs" justify="center">
               <Text size="sm" c="dimmed">
                 Don't have an account?

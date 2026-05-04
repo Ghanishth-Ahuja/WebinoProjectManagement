@@ -26,6 +26,7 @@ import {
   ScrollArea,
   Divider,
   FileInput,
+  Progress,
 } from "@mantine/core";
 import { DatePickerInput, DateTimePicker } from "@mantine/dates";
 import { notifyError, notifySuccess } from "../utils/Notification.jsx";
@@ -134,7 +135,7 @@ export default function ProjectDetail() {
   ]);
   const [newMessage, setNewMessage] = useState("");
   const [attachment, setAttachment] = useState(null);
-
+  const [admin,setAdmin]=useState({name:"",email:""})
   // Fetch project data
   const fetchProject = async () => {
     setIsLoading(true);
@@ -153,6 +154,10 @@ export default function ProjectDetail() {
           invitations: resp.data.invitations || [],
           status: "active", // Default status since not in response
         });
+        const adminMember = resp.data.projectmembers.find((member)=>member.role === "ADMIN");
+        if (adminMember) {
+          setAdmin({name:adminMember.user.name,email:adminMember.user.email});
+        }
       } else {
         console.error("Invalid response format:", resp);
         notifyError("Failed to load project data");
@@ -228,14 +233,15 @@ export default function ProjectDetail() {
 
   // Filtered tasks
   const filteredTasks = tasks.filter((task) => {
-    if (filterAssignee && task.assignee?.name !== filterAssignee) return false;
+    console.log(task.deadline)
+    console.log(typeof filterDateTo)
+    console.log(typeof filterDateFrom)
+    if (filterAssignee && task.assigneeId !== filterAssignee) return false;
     if (filterPriority && task.priority !== filterPriority) return false;
-    if (filterDateFrom && new Date(task.deadline) < filterDateFrom)
-      return false;
-    if (filterDateTo && new Date(task.deadline) > filterDateTo) return false;
+    if (filterDateFrom && new Date(task.deadline) < new Date(filterDateFrom)) return false;
+    if (filterDateTo && new Date(task.deadline) > new Date(filterDateTo)) return false;
     return true;
   });
-
   // Handle drag end - move task to new column
   // In frontend/src/pages/ProjectDetail.jsx, around lines 283-304
   const handleDragEnd = async (taskId, listId) => {
@@ -251,6 +257,7 @@ export default function ProjectDetail() {
           )
         );
         notifySuccess('Task moved successfully');
+        fetchTasks()
       } else {
         notifyError('Failed to move task');
       }
@@ -318,7 +325,7 @@ export default function ProjectDetail() {
     try {
       const response = await ApiService.PostData(
         `/project/addProjectMember/${projectId}`,
-        { email: inviteEmail }
+        { email: inviteEmail,isCurrentUserAdmin }
       );
       
       if (response.success) {
@@ -335,13 +342,14 @@ export default function ProjectDetail() {
       setIsInviting(false);
     }
   }
+  console.log(tasks)
   // Calculate stats
   const totalTasks = tasks.length;
-  const completedTasks = tasks.filter((t) => t.listId === "completed").length;
+  const completedTasks = tasks.filter((t) => t.list.title === "Done").length;
   const inProgressTasks = tasks.filter(
-    (t) => t.listId === "in-progress"
+    (t) => t.list.title === "In Progress"
   ).length;
-  const backlogTasks = tasks.filter((t) => t.listId === "backlog").length;
+  const backlogTasks = tasks.filter((t) => t.list.title === "To Do").length;
 
   // Show loader while loading
   if (isLoading) {
@@ -376,6 +384,8 @@ export default function ProjectDetail() {
               <Text size="sm" c="dimmed">
                 Created {project?.createdAt ? new Date(project.createdAt).toLocaleDateString("en-GB") : ""}
               </Text>
+              {admin.email && <Text size="sm" c="dimmed">Admin Email - {admin.email}</Text>}
+              {admin.name && <Text size="sm" c="dimmed">Admin Name - {admin.name}</Text>}
             </div>
           </Group>
         </Stack>
@@ -400,7 +410,7 @@ export default function ProjectDetail() {
           
 
       {/* Stats Cards */}
-      <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="md" mb="xl">
+      <SimpleGrid cols={{ base: 1, sm: 2, md: 5 }} spacing="md" mb="xl">
         <Card withBorder shadow="sm">
           <Group justify="space-between" mb="xs">
             <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
@@ -463,6 +473,22 @@ export default function ProjectDetail() {
           <Text size="xl" fw={700}>
             {backlogTasks}
           </Text>
+        </Card>
+        <Card withBorder shadow="sm">
+          <Group justify="space-between" mb="xs">
+            <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
+              Completion %
+            </Text>
+            <IconChecklist
+              size={20}
+              stroke={1.5}
+              color="var(--mantine-color-blue-6)"
+            />
+          </Group>
+          <Text size="xl" fw={700}>
+            {totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}%
+          </Text>
+          <Progress value={totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0} size="sm" mt="xs" />
         </Card>
       </SimpleGrid>
 

@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import {
   Container,
   Title,
@@ -16,6 +16,7 @@ import {
   Badge,
   ActionIcon,
   Box,
+  FileInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
@@ -28,7 +29,6 @@ import {
   IconUpload,
 } from "@tabler/icons-react";
 import UserContext from "../context/UserContext.js";
-import { notifications } from "@mantine/notifications";
 import ApiService from "../utils/ApiService.js";
 import { notifyError, notifySuccess } from "../utils/Notification.jsx";
 
@@ -63,6 +63,7 @@ function SectionCard({ title, description, children, icon: Icon }) {
 function ProfileTab() {
   const { user, setUser } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
+  const [avatar,setAvatar]=useState(null)
   const form = useForm({
     initialValues: {
       name: user?.name || "",
@@ -73,15 +74,27 @@ function ProfileTab() {
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
     },
   })
-  const [userName,setUserName]=useState(form.getInputProps("name").value)
-  
+
+  useEffect(() => {
+    if (user) {
+      form.setValues({
+        name: user.name || "",
+        email: user.email || "",
+      });
+    }
+  }, [user]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const formdata = new FormData()
+    formdata.append("avatar",avatar)
+    formdata.append("username",userName)
     setIsLoading(true);
     try {
-      const response = await ApiService.PostData(`/user/updateUserName/${user?.id}`, {userName});
+      const response = await ApiService.PostWithFormData(`/user/updateUserProfileById/${user?.id}`, formdata);  
       if (response.success) {
-        setUser({ ...user, name: userName });
+        setUser({ ...user, name: form.values.name });
+        setAvatar()
         notifySuccess(
           "Profile updated successfully",
         );
@@ -105,17 +118,18 @@ function ProfileTab() {
           <Stack gap="md">
             {/* Avatar Upload Section */}
             <Group align="flex-start">
-              <Avatar size="xl" name={user?.name} />
+              <Avatar size="xl" src={user?.avatar}/>
               <Stack gap="xs">
-                <Button
-                  variant="light"
-                  size="sm"
+                <FileInput
+                  label="Change Avatar"
+                  placeholder="Change Avatar"
                   leftSection={<IconUpload size={14} />}
-                >
-                  Change Avatar
-                </Button>
+                  accept="image/png,image/jpeg,image/jpg"
+                  value={avatar}
+                  onChange={setAvatar}
+                />
                 <Text size="xs" c="dimmed">
-                  JPG, PNG or GIF. Max size 2MB.
+                  JPG, JPEG or PNG. Max size 2MB.
                 </Text>
               </Stack>
             </Group>
@@ -123,8 +137,7 @@ function ProfileTab() {
             <TextInput
               label="Full Name"
               placeholder="Your name"
-              value={userName}
-              onChange={(e)=>setUserName(e.target.value)}
+              {...form.getInputProps("name")}
             />
 
             <TextInput

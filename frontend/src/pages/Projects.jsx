@@ -119,7 +119,7 @@ export default function Projects() {
         notifySuccess("Project deleted successfully!");
         setDeleteModalOpen(false);//close modal
         setProjectToDelete(null);
-        fetchAllProjects(); // Refresh list
+        fetchAllProjects(); // Refresh list 
       }
     } catch (error) {
       console.error("Failed to delete project:", error);

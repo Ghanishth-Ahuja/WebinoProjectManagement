@@ -9,6 +9,9 @@ import generateAccessToken from "../utils/generateJwtToken.js";
 import sendEmail from "../utils/sendEmail.js";
 import { resetPasswordHtml } from "../emailHtml/emailHtml.js";
 import { HOST_NAME } from "../constants.js";
+import {v2 as cloudinary} from "cloudinary"
+import multer from "multer";
+const upload = multer()
 /**
  * @type {import("express").RequestHandler}
  */
@@ -86,6 +89,7 @@ export const loginUser = async (req, res) => {
       id: true,
       name: true,
       email: true,
+      avatar:true
     },
   });
   if (!user) {
@@ -95,7 +99,7 @@ export const loginUser = async (req, res) => {
   if (!isPasswordCorrect) {
     throw new ApiError(401, "Invalid Password");
   }
-  const token = await generateAccessToken(user?.id, user?.name, user?.email);
+  const token = await generateAccessToken(user?.id, user?.name, user?.email,user?.avatar);
   res.cookie("token", token, {
     httpOnly: true,
     secure: true,
@@ -109,6 +113,7 @@ export const loginUser = async (req, res) => {
         name: user?.name,
         email: user?.email,
         id: user?.id,
+        avatar:user?.avatar
       }),
     );
 };
@@ -246,16 +251,36 @@ export const resetPassword = async (req, res) => {
       .json(new ApiResponse(200, "Password Updated Successfully"));
   }
 };
-export const updateUserNameById=async(req,res)=>
+export const updateUserProfileById=async(req,res)=>
 {
-const { userName} = req.body;
+const { username} = req.body;
 const {userId} = req.params;
+if (!req.file) {
+    throw new ApiError(400, "No file uploaded");
+  }
+  const config = cloudinary.config({
+    cloud_name: "dexuggmw3",
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+  const uniquePublicId = `product-${req.file.originalname.replace(/\s+/g, "_")}-${Date.now()}`;
+  // Upload an image
+  const uploadResult = await cloudinary.uploader
+    .upload(req?.file?.path, {
+      folder: "uploads",
+      public_id: uniquePublicId,
+      resource_type:"auto"
+    })
+    .catch((error) => {
+    });
+  let img_url = uploadResult?.secure_url;
 const updatedUser = await prisma.user.update({
     where: {
         id: userId,
     },
     data: {
-        name: userName,
+        name: username,
+        avatar:img_url
     },
 });
 if(!updatedUser){

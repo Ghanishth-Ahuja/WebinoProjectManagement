@@ -7,4 +7,5 @@ import ProjectMembers from "./ProjectMembers";
 import Settings from "./Settings";
 import ProjectDetail from "./ProjectDetail";
 import TaskDetails  from "./TaskDetails";
-export { TaskDetails,Dashboard, Login, Signup, ResetPassword, ResetPasswordAuth, ProjectMembers, Settings, ProjectDetail };
+import Notifications from "./Notifications"
+export { Notifications,TaskDetails,Dashboard, Login, Signup, ResetPassword, ResetPasswordAuth, ProjectMembers, Settings, ProjectDetail };

@@ -3,14 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container, Title, Text, Badge, Group, Avatar, Stack, Tabs, Card,
   Button, Textarea, FileInput, ScrollArea, Divider, Loader, Alert,
-  ActionIcon, Paper
+  ActionIcon, Paper,
+  Skeleton
 } from '@mantine/core';
 import {
   IconArrowLeft, IconCalendar, IconPaperclip, IconSend, IconTrash,
   IconDownload, IconEye
 } from '@tabler/icons-react';
 import ApiServices from '../utils/ApiService';
-import { notifications } from '@mantine/notifications';
 import { notifyError, notifySuccess } from '../utils/Notification';
 
 export default function TaskDetails() {
@@ -26,7 +26,7 @@ export default function TaskDetails() {
   const [newComment, setNewComment] = useState('');
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-
+  const [deleting,setDeleting]=useState(false)
   // Load task details, comments, and attachments on mount
   useEffect(() => {
     loadTaskData();
@@ -112,10 +112,13 @@ export default function TaskDetails() {
   // Delete comment
   const handleDeleteComment = async (commentId) => {
     try {
+      setDeleting(true)
       await ApiServices.DeleteData(`/project/deleteCommentOnTaskByTaskId/${commentId}`);
       setComments(prev => prev.filter(c => c.id !== commentId));
       notifySuccess('Comment deleted');
+      setDeleting(false)
     } catch (error) {
+      setDeleting(false)
       notifyError(
         error.message || 'Failed to delete comment'
       );
@@ -125,10 +128,13 @@ export default function TaskDetails() {
   // Delete attachment
   const handleDeleteAttachment = async (attachmentId) => {
     try {
+      setDeleting(true)
       await ApiServices.DeleteData(`/project/deleteAttachmentOnTaskByTaskId/${attachmentId}`);
       setAttachments(prev => prev.filter(a => a.id !== attachmentId));
       notifySuccess('Attachment deleted');
+      setDeleting(false)
     } catch (error) {
+      setDeleting(false)
       notifyError(
         error.message || 'Failed to delete attachment'
       );
@@ -243,7 +249,7 @@ export default function TaskDetails() {
                     </Text>
                   ) : (
                     comments.map((comment) => (
-                      <Paper key={comment.id} withBorder p="md">
+                      <Paper key={comment.id} p="md">
                         <Group justify="space-between" mb="xs">
                           <Group gap="xs">
                             <Avatar size="sm" color="blue">
@@ -259,6 +265,7 @@ export default function TaskDetails() {
                             variant="light"
                             size="sm"
                             onClick={() => handleDeleteComment(comment.id)}
+                            loading={deleting}
                           >
                             <IconTrash size={14} />
                           </ActionIcon>
@@ -329,6 +336,7 @@ export default function TaskDetails() {
                               color="red"
                               variant="light"
                               onClick={() => handleDeleteAttachment(attachment.id)}
+                              loading={deleting}
                             >
                               <IconTrash size={16} />
                             </ActionIcon>

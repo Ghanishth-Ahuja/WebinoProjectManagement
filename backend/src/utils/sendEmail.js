@@ -10,13 +10,13 @@ export default async function sendEmail(options) {
     const result = await brevo.transactionalEmails.sendTransacEmail({
       sender: {
         email: "patherpanchali28@gmail.com",
-        name: "Ghanishth",
+        name: options.senderName,
       },
-      subject: `${options.subject}`,
+      subject: options.subject,
       to: [
         {
-          email: `${options.receicerEmail}`,
-          name: `${options.name}`,
+          email: options.receicerEmail,
+          name: options.name,
         },
       ],
       htmlContent: `${options.htmlContent}`,

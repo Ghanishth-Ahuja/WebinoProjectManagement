@@ -12,8 +12,10 @@ import {
   Settings,
   ProjectDetail,
   TaskDetails,
+  Notifications
 } from "./pages/index.js";
 import Projects from "./pages/Projects.jsx";
+import NotFound404 from "./pages/NotFound404.jsx";
 
 function App() {
   return (
@@ -24,7 +26,7 @@ function App() {
       <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* Public routes - accessible when NOT logged in */}
-      <Route element={<PublicGuard />}>
+      <Route element={<PublicGuard />}> 
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/resetpassword" element={<ResetPassword />} />
@@ -39,12 +41,14 @@ function App() {
           <Route path="/projects/:projectId" element={<ProjectDetail />} />
           <Route path="/members" element={<ProjectMembers />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
         </Route>  
       </Route>
 
       {/* Catch all - redirect to login */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<NotFound404/>} />
+      {/* <Route path="*" element={<Navigate to="/login" replace />} /> */}
     </Routes>
     </BrowserRouter>
   );
