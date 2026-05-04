@@ -1,4 +1,4 @@
-const development = true;
+const development = false;
 export const SCHEME_PLUS_PORT = development
   ? `http://localhost:8080`
   : "https://webinoprojectmanagement.onrender.com";
