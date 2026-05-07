@@ -52,7 +52,8 @@ export function AuthGuard() {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    const intendedUrl = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/login?redirect=${intendedUrl}`} replace />;
   }
 
   return <Outlet />;

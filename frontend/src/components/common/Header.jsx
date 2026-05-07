@@ -20,10 +20,10 @@ export default function Header({ mobileOpened, toggleMobile }) {
       console.log(error)
     }
   }
-  useEffect(()=>
-  {
-    getAllNotifications()
-  },[user])
+  // useEffect(()=>
+  // {
+  //   getAllNotifications()
+  // },[user])
   return (
     <Group h="100%" px="md" justify="space-between">
       {/* Left */}
@@ -41,7 +41,7 @@ export default function Header({ mobileOpened, toggleMobile }) {
 
       {/* Right */}
       <Box style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <Indicator label={10} size={20}
+        {/* <Indicator label={10} size={20}
         >
           <ActionIcon
         variant="default"
@@ -50,7 +50,7 @@ export default function Header({ mobileOpened, toggleMobile }) {
         >
           <IconBell size={20}/>
         </ActionIcon>
-        </Indicator>
+        </Indicator> */}
         <ActionIcon
           onClick={toggleColorScheme}
           variant="default"

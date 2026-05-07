@@ -265,16 +265,23 @@ export const assignNewTaskToUser = async (req, res) => {
       listId: toDoList.id,
       projectId: projectId,
       assigneeId: userId,
+    },
+    select:{
+      assignee:{
+        select:{
+          email:true
+        }
+      }
     }
   });
   if (!task) {
     throw new ApiError(404, "Task not created");
   }
   await sendEmail({
-    receicerEmail: user.email,
-    name: user.name,
+    receicerEmail: task.assignee.email,
+    name: task.assignee.name,
     subject: "Task Assignment",
-    htmlContent: taskAssignmentEmailHtml(`${HOST_NAME}/projects/${projectId}`, project.title)
+    htmlContent: taskAssignmentEmailHtml(`${HOST_NAME}/projects/${projectId}`, task.title)
   })
   return res.status(200).json(new ApiResponse(200, "Task created successfully", task));
 }

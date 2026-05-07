@@ -202,7 +202,7 @@ export const invitationEmailHtml = (buttonUrl, projectName) => `
   </body>
 </html>
 `;
-export const taskAssignmentEmailHtml = (buttonUrl, projectName) => `
+export const taskAssignmentEmailHtml = (buttonUrl, taskTitle) => `
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -286,7 +286,7 @@ export const taskAssignmentEmailHtml = (buttonUrl, projectName) => `
     <div class="container text-center p-4">
       <img src="https://d1oco4z2z1fhwp.cloudfront.net/templates/default/3986/header3.png" alt="Main Image" class="img-fluid mb-3" style="max-width: 232px" />
       <h1 class="h4">You're Assigned a Task</h1>
-      <p>Project: ${projectName}</p>
+      <p>Task: ${taskTitle}</p>
       <a href="${buttonUrl}" class="btn-accept mt-3">VIEW TASK</a>
       <p class="mt-2">
         If you're having trouble with the button above, copy and paste the URL below into your web browser.

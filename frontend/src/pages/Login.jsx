@@ -17,7 +17,7 @@ import {
 } from "@mantine/core";
 import { IconAlertCircle, IconArrowLeft, IconArrowNarrowLeft } from "@tabler/icons-react";
 import {notifyError,notifySuccess} from "../utils/Notification.jsx"
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ApiService from "../utils/ApiService.js";
 import UserContext  from "../context/UserContext.js";
 export default function Login() {
@@ -26,6 +26,7 @@ export default function Login() {
   const [error, setError] = useState({ error: false, message: "" });
   const [formdata, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     try {
@@ -34,9 +35,21 @@ export default function Login() {
       const response = await ApiService.PostData("/user/login", formdata);
       if (response.success) {
         notifySuccess("Login Successful");
-        navigate("/dashboard");
         setUser({name:response.data?.name,email:response.data?.email,id:response.data?.id,avatar:response.data?.avatar});
         setIsAuthenticated(true);
+
+        // Check for redirect query param
+        const searchParams = new URLSearchParams(location.search);
+        const redirectTo = searchParams.get('redirect');
+        console.log(redirectTo)
+        if (redirectTo) {
+          const decodedRedirect = decodeURIComponent(redirectTo);
+          console.log("Redirecting to:", decodedRedirect);
+          navigate(decodedRedirect);
+        } else {
+          console.log("Redirecting to dashboard");
+          navigate("/dashboard");
+        }
       }
     } catch (error) {
       setError({ error: true, message: error?.message });
