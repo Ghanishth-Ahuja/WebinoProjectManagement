@@ -1,4 +1,4 @@
-import mongoose, { model, mongo, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 
 let projectSchema = new Schema(
   {
@@ -16,7 +16,7 @@ let projectSchema = new Schema(
       trim: true,
     },
     invitedMembers: {
-        type:[String],
+      type: [String],
     },
     dueDate: {
       required: true,
@@ -28,8 +28,8 @@ let projectSchema = new Schema(
       default: false,
     },
   },
-  { timestamps: true }, //use model.markModified('datefield') for saving date fields, because 
-  // .save() automatically doesn't 
+  { timestamps: true }, //use model.markModified('datefield') for saving date fields, because
+  // .save() automatically doesn't
 );
 
 const Project = model("Project", projectSchema);

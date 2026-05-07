@@ -1,0 +1,11 @@
+import Dashboard from "./Dashboard";
+import Login from "./Login";
+import Signup from "./Signup";
+import ResetPassword from "./ResetPassword";
+import ResetPasswordAuth from "./ResetPasswordAuth";
+import ProjectMembers from "./ProjectMembers";
+import Settings from "./Settings";
+import ProjectDetail from "./ProjectDetail";
+import TaskDetails  from "./TaskDetails";
+import Notifications from "./Notifications"
+export { Notifications,TaskDetails,Dashboard, Login, Signup, ResetPassword, ResetPasswordAuth, ProjectMembers, Settings, ProjectDetail };
