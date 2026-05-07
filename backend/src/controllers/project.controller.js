@@ -5,7 +5,7 @@ import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import sendEmail from "../utils/sendEmail.js";
 import { HOST_NAME } from "../constants.js";
-import { invitationEmailHtml } from "../emailHtml/emailHtml.js";
+import { invitationEmailHtml,taskAssignmentEmailHtml } from "../emailHtml/emailHtml.js";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs"
 
@@ -118,6 +118,12 @@ export const addProjectMember = async (req, res) => {
         role: 'MEMBER'
       }
     });
+    await sendEmail({
+      receicerEmail: email,
+      name: "User",
+      subject: "Task Assignment",
+      htmlContent: invitationEmailHtml(`${HOST_NAME}/projects/${projectId}`, project.title)
+    })
     return res.status(200).json(new ApiResponse(200, "Project member added successfully", projectMember));
   }
   if (!user) {
@@ -264,6 +270,12 @@ export const assignNewTaskToUser = async (req, res) => {
   if (!task) {
     throw new ApiError(404, "Task not created");
   }
+  await sendEmail({
+    receicerEmail: user.email,
+    name: user.name,
+    subject: "Task Assignment",
+    htmlContent: taskAssignmentEmailHtml(`${HOST_NAME}/projects/${projectId}`, project.title)
+  })
   return res.status(200).json(new ApiResponse(200, "Task created successfully", task));
 }
 export const getAllTasksByProjectId = async (req, res) => {
